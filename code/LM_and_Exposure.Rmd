@@ -1,0 +1,58 @@
+---
+title: "LM and Exposure ratio"
+author: "Josep Monclús Carrasco"
+date: "2023-03-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Linear Regresion Model for price of the classes
+
+```{r}
+library(dplyr)
+profesoras_def <- read_csv("data/tutors.csv", 
+    col_types = cols(X1 = col_skip(), X1_1 = col_skip(), 
+        n_estudiantes = col_character(), 
+        edad = col_character(), nacionalidad = col_character()))
+model = lm(log(precio) ~ genero*materia +genero*webpage + has_photo,data = profesoras_def %>% dplyr::filter(genero %in% c("female","male")) %>% distinct(id_profesor,precio,genero,materia,webpage,has_photo,edad) )
+summary(model)
+```
+
+
+## Exposure difference between men and women
+
+```{r}
+profesoras_def_top40 = profesoras_def %>% filter(posicion_top <= 40)
+m = profesoras_def_top40 %>% group_by(genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2))))%>% filter(genero == "female")
+h = profesoras_def_top40 %>% group_by(genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2))))%>% filter(genero == "male")
+m$dif = (m$Exposure - h$Exposure)*100
+m
+m = profesoras_def_top40 %>% group_by(webpage,genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2)))) %>% filter(genero == "female")
+h = profesoras_def_top40 %>% group_by(webpage,genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2)))) %>% filter(genero == "male")
+m$dif = (m$Exposure - h$Exposure)*100
+m
+m = profesoras_def_top40 %>% group_by(materia,genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2))))%>% filter(genero == "female")
+h = profesoras_def_top40 %>% group_by(materia,genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2))))%>% filter(genero == "male")
+m$dif = (m$Exposure - h$Exposure)*100
+m
+m = profesoras_def_top40 %>% group_by(ciudad,genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2))))%>% filter(genero == "female")
+h = profesoras_def_top40 %>% group_by(ciudad,genero) %>% summarise(Exposure = mean((1/log(1+posicion_top)) / (1/log(2))))%>% filter(genero == "male")
+m$dif = (m$Exposure - h$Exposure)*100
+m
+
+#profesoras_def_top40 %>% filter(webpage == "yoopie" & genero == "male")
+```
+
+```{r}
+profesoras_def$log_discount = (1/log(1 + profesoras_def$posicion_top)) / (1/log(2))
+profesoras_def_top40$log_discount = (1/log(1 + profesoras_def_top40$posicion_top)) / (1/log(2))
+
+library(ggplot2)
+
+ggplot(data = profesoras_def_top40) + geom_violin(aes(x=genero,y=log_discount,color = genero,fill=genero))
+
+ggplot(data = profesoras_def_top40) + geom_boxplot(aes(x=genero,y=log_discount,color = genero,fill=genero))
+```
