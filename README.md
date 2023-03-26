@@ -1,6 +1,7 @@
 # Analysing the gender gap in online services: the case of private tutors
 
-### Josep Monclús Carrasco University of Valencia Data Science Degree
+### Josep Monclús Carrasco University of Valencia 
+### Data Science Degree
 
 Here you can find the release of the data and code that I have created during my TFG
 
