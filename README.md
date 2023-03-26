@@ -10,7 +10,7 @@ You can find it by unziping the file data.zip
 
 I have created a dataset with more than 10k rows of information about Spanish tutors from web pages using web scrapping. All information is anonymised through database anonymisation processes. 
 
-- tutors.csv -> Entire dataset of tutors
+- **tutors.csv** -> Entire dataset of tutors
 
 ## Fair-Analysis
 
