@@ -1,0 +1,153 @@
+---
+title: "Data Treatment"
+author: "Josep Monclús Carrasco"
+date: '2022-12-14'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Treatment
+
+```{r}
+library(readr)
+library(dplyr)
+profesoras_def <- read_csv("data/profesoras_def.csv", 
+    col_types = cols(X1 = col_skip(), X1_1 = col_skip(), 
+        n_estudiantes = col_character(), 
+        edad = col_character(), nacionalidad = col_character()))
+unique(profesoras_def$genero)
+unique(profesoras_def$valoracion)
+unique(profesoras_def$precio)
+unique(profesoras_def$n_estudiantes)
+unique(profesoras_def$edad)
+unique(profesoras_def$materia)
+unique(profesoras_def$ciudad)
+unique(profesoras_def$webpage)
+```
+
+## Manually inferring unknowns
+
+In this block we will manually infer the missing unknows, as well as filter the dataset by removing the people whose gender is not inferred and those who are academies and not people. We also fix a problem with the ids, some of them are generated with 10 and others with 50 characters, so we are going to reduce the ones with 50 to 10. Finally we will remove the url of the set so that it is completely anonymised and fix the city category to have the dataset completely fixed.
+
+```{r}
+profesoras_def[profesoras_def$genero == "unknown" & !is.na(profesoras_def$genero),]$genero = c("female","male","female","male","female","female","female","female","male","female","female","female","female","male","male","male","male")
+profesoras_def = profesoras_def %>% filter(!is.na(genero) & genero != "academia")
+#profesoras_def[is.na(profesoras_def$precio),]
+profesoras_def$ciudad[profesoras_def$ciudad %in% c("online","onl","online1","online2","online3","online4",
+                                                   "online5","online6","online7","online8","online9","online10",
+                                                   "online10","online11","online12")] = "Online"
+unique(sapply(profesoras_def$id_profesor,nchar))
+profesoras_def$id_profesor = substring(profesoras_def$id_profesor, first=1, last=14)
+unique(sapply(profesoras_def$id_profesor,nchar))
+
+#profesoras_def %>%  distinct(id_profesor,genero) %>% group_by(genero) %>% summarise(n())
+profesoras_def$url = NULL
+profesoras_def$...1 = NULL
+```
+
+```{r}
+profesoras_def$has_photo = as.factor(profesoras_def$has_photo)
+```
+
+#Statistical Analysis
+
+```{r}
+profesoras_def %>% group_by(id_profesor,genero) %>% summarise(n()) %>% group_by(id_profesor) %>% summarise(n()) 
+```
+
+
+```{r}
+profesoras_def %>% distinct(id_profesor,precio,ciudad,genero) 
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(PupillometryR)
+profesoras_def %>% distinct(id_profesor,genero,precio) %>% group_by(genero) %>% summarise(mean = mean(precio,na.rm=T),std = sd(precio,na.rm=T),min=min(precio,na.rm=T),max=max(precio,na.rm = T))
+
+profesoras_def %>% distinct(id_profesor,precio,ciudad,genero) %>% group_by(ciudad) %>% summarise(n=n())
+profesoras_def %>% distinct(id_profesor,precio,materia,genero) %>% group_by(materia) %>% summarise(n=n())
+profesoras_def %>% distinct(id_profesor,precio,webpage,genero)  %>% group_by(webpage) %>% summarise(n=n())
+profesoras_def %>% distinct(id_profesor,precio,edad,genero) %>% group_by(edad) %>% summarise(n=n())
+profesoras_def %>% distinct(id_profesor,precio,has_photo,genero) %>% group_by(has_photo) %>% summarise(n=n())
+
+a = profesoras_def %>% distinct(id_profesor,precio,ciudad,genero)%>% ggplot() + geom_boxplot(aes(x=ciudad,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,30))+ylab("")+xlab("")
+
+b = profesoras_def %>% distinct(id_profesor,precio,materia,genero)%>% ggplot() + geom_boxplot(aes(x=materia,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,30)) +ylab("")+xlab("")
+
+c = profesoras_def %>% distinct(id_profesor,precio,webpage,genero)%>% ggplot() + geom_boxplot(aes(x=webpage,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,50)) +ylab("")+xlab("")
+
+d = profesoras_def  %>% distinct(id_profesor,precio,edad,genero)%>% ggplot() + geom_boxplot(aes(x=edad,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,50))+ylab("")+xlab("")
+
+e = profesoras_def %>% distinct(id_profesor,precio,has_photo,genero)%>% ggplot() + geom_boxplot(aes(x=has_photo,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,50))+ylab("")+xlab("")
+
+f = profesoras_def %>% distinct(id_profesor,genero,precio)%>% ggplot() + geom_flat_violin(aes(x= genero,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,50)) +coord_flip() +ylab("")+xlab("")
+
+g = profesoras_def %>% filter(posicion_top <= 10) %>% mutate(top = as.factor(posicion_top))%>% ggplot() + geom_boxplot(aes(x= top,y=precio),position="identity",alpha = 0.4) + ylim(c(0,50))+ylab("")+xlab("")
+
+#ggsave("plots/ciudades_boxplot.png",width = 12, height = 10,a+ theme(axis.text = element_text(size = 10)),dpi=300)
+#ggsave("plots/materia_boxplot.png",width = 12, height = 10,b+ theme(axis.text = element_text(size = 10)),dpi=300)
+#ggsave("plots/pagina_boxplot.png",width = 12, height = 10,c+ theme(axis.text = element_text(size = 10)),dpi=300)
+#ggsave("plots/edad_boxplot.png",width = 12, height = 10,d+ theme(axis.text = element_text(size = 10)),dpi=300)
+#ggsave("plots/foto_boxplot.png",width = 12, height = 10,e+ theme(axis.text = element_text(size = 10)),dpi=300)
+#ggsave("plots/genero_boxplot.png",width = 12, height = 10,f+ theme(axis.text = element_text(size = 10)),dpi=300)
+#ggsave("plots/posicion_boxplot.png",width = 12, height = 10,g+ theme(axis.text = element_text(size = 10)),dpi=300)
+```
+
+```{r}
+posicion = profesoras_def %>% mutate(pos = ifelse(posicion_top <= 10,"1-10",ifelse(posicion_top <=25,"11-25",ifelse(posicion_top <= 50,"26-50","50+"))))
+posicion %>% distinct(id_profesor,precio,pos,genero) %>% group_by(pos) %>% summarise(n=n())
+h = posicion  %>% distinct(id_profesor,precio,genero,pos)%>% ggplot() + geom_boxplot(aes(x= pos,y=precio),position="identity",alpha = 0.4) + ylim(c(0,50))+ylab("")+xlab("")
+h + geom_hline(yintercept = 15,color="red")
+i = posicion  %>% distinct(id_profesor,precio,genero,pos)%>% ggplot() + geom_boxplot(aes(x= pos,y=precio,fill=genero),position="identity",alpha = 0.4) + ylim(c(0,50))+ylab("")+xlab("")
+i
+#ggsave("plots/top1_boxplot.png",width = 12, height = 10,h + geom_hline(yintercept = 15,color="red")+ theme(axis.text = element_text(size = 20)),dpi=300)
+#ggsave("plots/top2_boxplot.png",width = 12, height = 10,i+ theme(axis.text = element_text(size = 20)),dpi=300)
+```
+
+
+```{r}
+summary(profesoras_def)
+```
+
+
+## Regular expressions to clean up the description
+
+- Upper case to lower case
+
+- Everything between {{}} such as [DEL] -> \\{\\{(.*?)\\}\\}
+
+- The Want to learn... delete
+
+- Tabs and blank space breaks
+
+```{r}
+library(stringr)
+
+profesoras_def$descripcion_clean = gsub("\\{\\{(.*?)\\}\\}","[DEL]",profesoras_def$descripcion)
+```
+
+```{r}
+profesoras_def$comentarios = gsub("¿Qué quieres aprender? ¿Qué quieres aprender?","",profesoras_def$comentarios)
+```
+
+
+## Cleaning Nacionalities Nans
+
+```{r}
+library(dplyr)
+profesoras_def[profesoras_def$nacionalidad == "Nan" & !is.na(profesoras_def$nacionalidad),]$nacionalidad = NA
+profesoras_def %>% group_by(nacionalidad,genero) %>% summarise(n()) %>% arrange(desc(`n()`))
+length(unique(profesoras_def$nacionalidad))
+```
+## Save definitive dataset
+
+```{r}
+write.csv(profesoras_def,"data/tutors.csv")
+```
+
