@@ -14,6 +14,6 @@ I have created a dataset with more than 10k rows of information about Spanish tu
 
 All the code from the fair-analysis is released too in this repository, for more information you can contact direct to me.
 
-- data_treatment.Rmd -> Here you can find all treatment process that data have recieved make it with R program
+- **data_treatment.Rmd** -> Here you can find all treatment process that data have recieved make it with R program
 
-- LM_Exposure.Rmd -> Here you can find the creation of the Linear Regresion Model to describe the price and the Exposure differences between men and women
+- **LM_Exposure.Rmd** -> Here you can find the creation of the Linear Regresion Model to describe the price and the Exposure differences between men and women
