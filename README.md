@@ -26,3 +26,7 @@ All the code from the fair-analysis is released too in this repository, for more
 - **queries.txt** -> All queries used during the collection process.
 
 - **Fair Ranking Test.ipynb** -> All functions and parameters need it to run the Fair Test.
+
+- **gender-clasification-descriptions.ipynb** -> All training of models to study descriptions and shifterator plots.
+
+- **gender-clasification-comments.ipynb** -> All training of models to study comments and shifterator plots.
