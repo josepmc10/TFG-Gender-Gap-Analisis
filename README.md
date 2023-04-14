@@ -23,4 +23,6 @@ All the code from the fair-analysis is released too in this repository, for more
 
 - **web_scrapping.ipynb** -> All the web scrapping process to extract the data that I have been using.
 
-- **queries.txt** -> All queries used during the collection process
+- **queries.txt** -> All queries used during the collection process.
+
+- **Fair Ranking Test.ipynb** -> All functions and parameters need it to run the Fair Test.
